@@ -4,7 +4,8 @@ Captured 2026-11-01, for later.
 
 ## GitHub identity for the sandbox
 
-Decision pending: **machine user (recommended)** or **GitHub App**.
+Decision (2026-11-02): **Option A, machine user `de-fraengi`** with fine-grained
+token. Option B (GitHub App) stays documented below as an alternative.
 
 Context:
 
@@ -34,13 +35,27 @@ Context:
 - [ ] Verify inside the sandbox: `gh auth status`, push a test branch, open a
       test PR, confirm `main` rejects direct pushes.
 
+### Open items (2026-11-02)
+
+- [ ] Merge PR #1 (`todo-env-done`): `main-protect` ruleset requires 1 approval
+      and the author cannot self-approve, `--admin` bypass is not allowed. In
+      the browser (`/rules/26386895`) set "Required approvals" to 0 for this
+      solo repo (keep "Require a pull request", no bypass for `de-fraengi`),
+      then `gh pr merge 1 --squash --delete-branch`, `git checkout main && git pull`.
+- [ ] Add `de-fraengi` as collaborator (write) on the target repo(s).
+- [ ] Verify token expiry/permissions of the `de-fraengi` token; set rotation
+      reminder.
+- [ ] Log in to Claude Code / OpenCode inside the container.
+- [ ] `OPENAI_API_KEY` in `.env` is empty (optional).
+- [ ] Always work on feature branches; direct pushes to `main` are rejected.
+
 ### Option A — machine user with fine-grained token (recommended)
 
 Why: works with the existing `GH_TOKEN` → `gh` + `git credential.helper`
 design, no hourly expiry, simplest to operate. Trade-off: long-lived token,
 consumes a seat on paid org plans, commits attributed to the machine account.
 
-- [ ] Create the machine-user account and give it access to the selected
+- [x] Create the machine-user account (`de-fraengi`) and give it access to the selected
       repositories (collaborator or team).
 - [ ] Create a fine-grained personal access token for that account, restricted
       to selected repositories:
@@ -50,7 +65,7 @@ consumes a seat on paid org plans, commits attributed to the machine account.
       - Workflows: read/write only if the agent may change `.github/workflows/*`
       - Metadata: read (automatic)
 - [ ] Set an expiry (e.g. 90 days) and a calendar reminder to rotate.
-- [ ] Put it in `.env` as `GITHUB_PERSONAL_ACCESS_TOKEN`.
+- [x] Put it in `.env` as `GITHUB_PERSONAL_ACCESS_TOKEN`.
 - [ ] Rotate later by editing `.env` and recreating the container.
 
 ### Option B — GitHub App
