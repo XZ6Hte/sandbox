@@ -29,7 +29,7 @@ Context:
       checks if CI exists.
 - [ ] Make sure neither the machine user nor the App is in the ruleset's
       bypass list.
-- [ ] Store the credential in `.env` (mode 600, gitignored) and recreate the
+- [x] Store the credential in `.env` (mode 600, gitignored) and recreate the
       container: `docker compose up -d --force-recreate`.
 - [ ] Verify inside the sandbox: `gh auth status`, push a test branch, open a
       test PR, confirm `main` rejects direct pushes.
