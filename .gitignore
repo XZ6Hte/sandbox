@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+
+# The bind-mounted work area belongs to the projects, not to this repository.
+workspace/*
+!workspace/.gitkeep
+
+.DS_Store
+*.swp

@@ -1,0 +1,64 @@
+name: sandbox
+
+services:
+  sandbox:
+    build:
+      context: .
+      args:
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+    image: sandbox-dev:latest
+    container_name: sandbox-dev
+    init: true
+    working_dir: /workspace
+
+    # .env holds the provider keys and the GitHub token. It is git-ignored;
+    # sandbox.sh creates it from .env.example on first run.
+    env_file:
+      - path: .env
+        required: false
+
+    environment:
+      # gh and git read GH_TOKEN; keep the article's variable name in .env.
+      GH_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN:-}
+      TERM: ${TERM:-xterm-256color}
+
+    volumes:
+      # The only host directory the sandbox can see.
+      - ./workspace:/workspace
+
+      # Persist logins across restarts/rebuilds.
+      - sandbox-claude:/home/dev/.claude
+      - sandbox-opencode:/home/dev/.local/share/opencode
+
+      # Persist package-manager caches so a recreated container does not
+      # re-download Composer/npm/Bun dependencies.
+      - sandbox-composer-cache:/home/dev/.cache/composer
+      - sandbox-composer-config:/home/dev/.config/composer
+      - sandbox-npm-cache:/home/dev/.npm
+      - sandbox-bun-cache:/home/dev/.bun
+
+      # Read-only configuration from this repository.
+      # Sandbox-wide rules, one file for both agents.
+      - ./config/memory/AGENTS.md:/home/dev/.config/opencode/AGENTS.md:ro
+      - ./config/memory/AGENTS.md:/home/dev/.claude/CLAUDE.md:ro
+      # Backlog the agents read at the start of a session.
+      - ./TODO.md:/home/dev/TODO.md:ro
+      # Claude Code: settings + skills (skills are also slash commands).
+      - ./config/claude/settings.json:/home/dev/.claude/settings.json:ro
+      - ./config/skills:/home/dev/.claude/skills:ro
+      # OpenCode: config + skills + slash-command wrappers.
+      - ./config/opencode/opencode.jsonc:/home/dev/.config/opencode/opencode.jsonc:ro
+      - ./config/skills:/home/dev/.config/opencode/skills:ro
+      - ./config/commands:/home/dev/.config/opencode/commands:ro
+
+    command: ["sleep", "infinity"]
+    stop_grace_period: 5s
+
+volumes:
+  sandbox-claude:
+  sandbox-opencode:
+  sandbox-composer-cache:
+  sandbox-composer-config:
+  sandbox-npm-cache:
+  sandbox-bun-cache:
