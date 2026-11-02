@@ -8,8 +8,8 @@ Decision pending: **machine user (recommended)** or **GitHub App**.
 
 Context:
 
-- The sandbox repository is at `/home/user2/projects/sandbox` (git init, no
-  commits, no remote).
+- The sandbox repository is at `/home/user2/projects/sandbox` (git, branch
+  `main`, remote `origin` = `https://github.com/XZ6Hte/sandbox.git`).
 - The container only sees `/workspace`; clone the target project there before
   anything else.
 - `gh` is not installed on the host, only inside the container. Account-level
@@ -86,7 +86,7 @@ because `gh` reads `GH_TOKEN` only at start.
 
 - [ ] Fill `.env`: git identity and GitHub token (currently placeholders).
 - [ ] Log in to OpenCode and Claude Code inside the container.
-- [ ] Make the first commit of the sandbox repository.
+- [x] Make the first commit of the sandbox repository (done; remote `origin` set up).
 - [ ] Optional: OpenCode 2.1.2 → 2.2.5 (bump the pin in the Dockerfile).
 - [ ] Optional: model right-sizing — cheap model for an `explore` subagent,
       strong model for `/plan-item`.

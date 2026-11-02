@@ -75,7 +75,8 @@ Named volumes: logins (`sandbox-claude`, `sandbox-opencode`) and package caches
    GitHub token is empty.
 2. Log in to OpenCode and Claude Code inside the container (README, "Logging
    in").
-3. Commit this repository — it is `git init`-ed but has no commits yet.
+3. ~~Commit this repository~~ — done: branch `main` tracks `origin/main`
+   (GitHub); the old remote `master` branch was deleted (only `main` remains).
 4. Optional: bump OpenCode from the pinned `2.1.2` (upstream latest is 2.2.5)
    in the Dockerfile and rebuild.
 5. Optional: add V2 `permissions` rules to `config/opencode/opencode.jsonc` now

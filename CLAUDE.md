@@ -85,9 +85,13 @@ No provider is authenticated yet (`opencode auth list` -> "No authenticated
 integrations"). The repo git identity is a repo-local placeholder
 (`user2 <user2@localhost>`).
 
-Git: branch `master`, no remote, one commit `5b30fa5 "the box"` (24 tracked
-files). `CLAUDE.md` is untracked; `HANDOVER.md` and `TODO.md` still say
-"no commits yet", which is stale.
+Git: branch `main` (renamed from `master`), tracking `origin/main`
+(`https://github.com/XZ6Hte/sandbox.git`; `gh` is authenticated on the WSL host,
+not in the container). History: `4a1cfd5 "Initial commit"` (GitHub README),
+`5b30fa5 "the box"`, `b94762e "Add AGENTS.md and CLAUDE.md"`, merge `44cb4ad`
+(unrelated histories, local README kept); 26 tracked files, `AGENTS.md` and
+`CLAUDE.md` included. The old remote branch `master` was deleted on GitHub
+(only `main` remains).
 
 ## Open TODOs
 
