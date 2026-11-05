@@ -54,7 +54,7 @@ first if you want to skip the warnings:
 For the GitHub token, use a classic token with the `repo` scope only. A
 fine-grained token (**read/write** on *Contents*, *Issues* and *Pull requests*)
 only reaches repositories owned by its own account or an organization; it
-cannot reach a repo where the machine user is only a collaborator (not tested
+likely cannot reach a repo where the machine user is only a collaborator (not tested
 here). Set an expiry, for example 90 days.
 
 Without `read:org`, `gh pr edit` and the default `gh pr view` output fail with
