@@ -62,8 +62,16 @@ Context:
       `de-fraengi` was invited to.
 - [x] Log in to Claude Code inside the container (reported by the user
       2026-11-05).
-- [ ] Log in to OpenCode inside the container.
+- [x] Log in to OpenCode inside the container (done: `opencode auth list`
+      shows Anthropic stored plus `ANTHROPIC_API_KEY` from the environment;
+      OpenCode is v2.2.5).
 - [ ] `OPENAI_API_KEY` in `.env` is empty (optional).
+- [ ] Note: Claude Code and OpenCode probably authenticate with
+      `ANTHROPIC_API_KEY` from `.env` (no `~/.claude/.credentials.json`), so
+      usage is billed per API call and the agent can read the key: use a key
+      with a spending limit.
+- [ ] Note: `/home/dev/.claude.json` is not in a volume and is lost on
+      `--force-recreate`; Claude Code may ask for its first-run setup again.
 - [ ] Always work on feature branches; direct pushes to `main` are rejected.
 - [x] Replace the `.env` token with one from `de-fraengi`, recreate the
       container, `gh auth status` shows `de-fraengi` (done 2026-11-05).
@@ -151,9 +159,10 @@ because `gh` reads `GH_TOKEN` only at start.
 
 - [x] Fill `.env`: git identity (`de-fraengi`, noreply address) and GitHub
       token (done 2026-11-05).
-- [ ] Log in to OpenCode inside the container (Claude Code is done).
+- [x] Log in to OpenCode and Claude Code inside the container (done).
 - [x] Make the first commit of the sandbox repository (done; remote `origin` set up).
-- [ ] Optional: OpenCode 2.1.2 → 2.2.5 (bump the pin in the Dockerfile).
+- [x] OpenCode 2.1.2 → 2.2.5: the container already runs 2.2.5; check that the
+      Dockerfile pin matches.
 - [ ] Optional: model right-sizing — cheap model for an `explore` subagent,
       strong model for `/plan-item`.
 - [ ] Optional: BuildKit cache mounts so image rebuilds do not re-download.
