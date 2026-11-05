@@ -12,9 +12,15 @@ container are separate — see the pointer at the end.
 - **Tooling only — no application code.** Real projects live in `workspace/`,
   which is a bind mount, git-ignored in practice (only `workspace/.gitkeep` is
   tracked), and must never be edited from here.
-- Git: branch `master`, single commit `5b30fa5 "the box"`, no remote.
-  Note: `HANDOVER.md` and `TODO.md` still say the repo has no commits — that is
-  stale. Do not repeat that claim, and do not "fix" those docs casually.
+- Git: branch `main`, remote `origin` = `https://github.com/XZ6Hte/sandbox.git`
+  (`main` tracks `origin/main`). Read counts live: `git ls-files | wc -l`,
+  `git log --oneline main | wc -l` (2026-11-05, before PR #12: 27 files,
+  16 commits on `main`).
+  `HANDOVER.md` is a dated log, so older statements in it can be outdated.
+- Purpose: modelled on the c't article "Schluss mit Vibe-Coding" (Jan Mahn,
+  2026-10-16). The coding agent runs inside the container; only the
+  bind-mounted `workspace/` is a writable host path (selected `config/` files
+  are mounted read-only).
 
 ## Layout (verified paths)
 
@@ -23,14 +29,19 @@ container are separate — see the pointer at the end.
 | `Dockerfile` | Image recipe (base `php:8.5-cli-bookworm`, OpenCode version pinned there) |
 | `compose.yaml` | Service `sandbox`, image `sandbox-dev:latest`, container `sandbox-dev`, mounts and volumes |
 | `sandbox.sh` / `sandbox.ps1` | Launchers for Linux/WSL and Windows |
-| `.env.example` → `.env` | Template; `.env` is created by `sandbox.sh`, mode 600, git-ignored |
+| `.env.example` → `.env` | Template; `.env` is created by `sandbox.sh`, git-ignored, readable only by the owner and the local group `shared` |
+| `.dockerignore`, `.editorconfig`, `.gitattributes`, `.gitignore` | Build context, editor and git hygiene (LF enforced; `*.ps1` stays CRLF) |
 | `scripts/entrypoint.sh` | Container entrypoint (git identity, safe.directory, gh helper) |
 | `scripts/install-docker-wsl.sh` | Installs Docker Engine inside WSL 2 |
-| `config/skills/{plan-item,implement-item}/SKILL.md` | Single source of truth for the two workflows |
+| `scripts/rotate-token.sh` | Host-side: replaces the GitHub token in `.env` (hidden input), checks the login, recreates the container |
+| `README.md` | Operational reference (setup, logins, daily use, troubleshooting) |
+| `TODO.md` | Backlog and current decisions; mounted read-only as `/home/dev/TODO.md` |
+| `HANDOVER.md` | Dated history of how the sandbox was built |
+| `config/skills/{plan-item,implement-item}/` | Single source of truth for the two workflows (`SKILL.md` and `references/`) |
 | `config/commands/{plan-item,implement-item}.md` | OpenCode slash-command wrappers for the skills |
 | `config/memory/AGENTS.md` | Sandbox-wide rules, mounted read-only into both agents |
-| `config/claude/settings.json` | Claude Code permissions |
-| `config/opencode/opencode.jsonc` | OpenCode config |
+| `config/claude/settings.json` | Claude Code permissions and default model (`sonnet`) |
+| `config/opencode/opencode.jsonc` | OpenCode config: `explore` subagent on Haiku; V2 `permissions` not set up (the container is the boundary) |
 | `workspace/` | Bind-mounted at `/workspace` — the only host path inside the container |
 
 ## Commands
@@ -44,11 +55,13 @@ From `sandbox.sh` (run in the WSL distro where Docker lives):
 | `./sandbox.sh build` | Rebuild image and open shell |
 | `./sandbox.sh up` / `down` | Start in background / stop and remove container (volumes kept) |
 | `./sandbox.sh status` / `logs` | Container state / follow logs |
+| `./sandbox.sh help` | Lists all commands |
 
 After changing `.env`, recreate the container so the new env is picked up:
 `docker compose up -d --force-recreate`. Logins and package caches live in
-named volumes and survive `down` and rebuilds; `docker compose down -v`
-deletes them.
+named volumes (in `compose.yaml` e.g. `sandbox-claude`; `docker volume ls`
+shows them with the project prefix, e.g. `sandbox_sandbox-claude`) and survive
+`down` and rebuilds; `docker compose down -v` deletes them.
 
 **Validation — there is no test suite and no linter for this repo.** Before
 committing, check the things you touched, for example:
@@ -66,6 +79,17 @@ committing, check the things you touched, for example:
   Windows. `.gitattributes`/`.editorconfig` exist for this.
 - No secrets in git. `.env` is git-ignored; the model can read it inside the
   container anyway, so never put unrelated secrets there either.
+- OpenCode is pinned in the Dockerfile (installer `https://opencode.ai/v2/install`);
+  the binary is `/home/dev/.opencode/bin/opencode`, symlinked as
+  `/usr/local/bin/opencode` and `opencode2`. Read the pinned and running versions
+  live: `grep -i opencode Dockerfile`, `./sandbox.sh exec opencode --version`.
+- Models: Claude Code defaults to `sonnet` (`config/claude/settings.json`);
+  `plan-item` runs on Opus. OpenCode's `explore` subagent uses Haiku.
+- Workflow skills: `/plan-item` only researches and posts a plan comment marked
+  `<!-- plan-item:v1 -->`; `/implement-item` requires that marker, works on a
+  feature branch and opens a PR. Both have `disable-model-invocation: true`
+  (explicit invocation only). One session per ticket; run `/init` once per
+  project in `workspace/`.
 - A GitHub App private key (if that option is chosen) stays on the host —
   never in the image, never in `.env`, never committed.
 - Changing `Dockerfile`, `compose.yaml` build args or `.env` requires an image
@@ -77,40 +101,34 @@ committing, check the things you touched, for example:
 
 ## Security model (short version)
 
-The container is the boundary: no Docker socket, no host home directory, no
-SSH agent; the only writable host path is `workspace/` (everything else from
-this repo is mounted read-only). Passwordless sudo inside the container is a
-convenience for tool installs, not a boundary. `main` protection in target
-repos is by instruction only here — real control is GitHub branch protection
-plus a least-privilege token.
+The container is the isolation boundary: no Docker socket, no host home
+directory, no SSH agent; the only writable host path is `workspace/`
+(everything else from this repo is mounted read-only). Passwordless sudo inside
+the container is a convenience for tool installs, not a boundary.
 
-## Current state and open work
+Branch protection on GitHub is the second layer. Target repos get a ruleset on
+`main`: pull request required, 1 approval, no force push, no bypass actors,
+required status checks. Rulesets on private repos need GitHub Pro on the owner
+account. The machine user `de-fraengi` develops in the container with its own
+token (`.env`, classic PAT with the `repo` scope only); the human account `XZ6Hte` approves in the browser.
+The approver's token never enters the container. Setup details and the current
+state of this decision: `TODO.md`.
 
-Sources of truth: `HANDOVER.md` (what was built, decisions) and `TODO.md`
-(backlog) — with the caveat above about their stale "no commits" wording.
-Verified current facts:
+## Current state
 
-- Container `sandbox-dev` running image `sandbox-dev:latest`; inside: OpenCode
-  (version pinned in the Dockerfile), Claude Code v2.1.318, PHP 8.5.12, Node v22.23.4, user `dev`.
-- Host: Docker Engine 29.9.2 + Compose v5.6.1 in WSL 2 (Ubuntu 26.04, user
-  `user2`).
-- `.env` exists with placeholders only; no agent logins or provider
-  integrations yet (`opencode auth list` is empty).
-
-Open work (details in `TODO.md`):
-
-- **GitHub identity decision** — machine user + fine-grained token
-  (recommended) vs GitHub App. A fine-grained token (Contents, Issues, Pull
-  requests read/write on selected repos) fits the existing `GH_TOKEN` design.
-  A GitHub App's private key must stay on the host with only short-lived
-  installation tokens entering the container.
-- Fill `.env` (git identity, GitHub token) and log in to OpenCode/Claude Code
-  inside the container.
-- Optional: bump the OpenCode pin, add OpenCode 2 `permissions` rules, model
-  right-sizing, BuildKit cache mounts.
+Dated pointer, not a status board: as of 2026-11-05 the sandbox is set up and
+logged in; open work and current decisions live in `TODO.md`, history in
+`HANDOVER.md`. Read versions live instead of trusting any document:
+`docker compose version`, `./sandbox.sh exec claude --version`,
+`./sandbox.sh exec opencode --version`.
 
 ## How to work in this repo
 
+- `main` of this repo takes pull requests only (ruleset `main-protect`);
+  work on a branch such as `docs-<topic>`. Force-push is blocked; never do it.
+- Edit a PR's body or base with `gh api -X PATCH repos/<owner>/<repo>/pulls/<n>`
+  (`gh pr edit` fails with a GraphQL scope error because the token lacks `read:org`).
+- Merge only after the human's explicit yes.
 - Read `README.md`, `HANDOVER.md` and `TODO.md` before changing behaviour;
   they explain why things are the way they are.
 - Ask before account-level or security-relevant changes (tokens, identities,
