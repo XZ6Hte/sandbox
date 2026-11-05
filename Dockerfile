@@ -89,7 +89,7 @@ RUN groupadd --gid "$USER_GID" dev \
 ENV HOME=/home/dev
 USER dev
 RUN curl -fsSL https://opencode.ai/v2/install | bash -s -- \
-        --version 2.1.2 \
+        --version 2.2.5 \
         --no-modify-path
 USER root
 RUN ln -sf /home/dev/.opencode/bin/opencode /usr/local/bin/opencode \
