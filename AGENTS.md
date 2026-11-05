@@ -20,7 +20,7 @@ container are separate — see the pointer at the end.
 
 | Path | Role |
 | --- | --- |
-| `Dockerfile` | Image recipe (base `php:8.5-cli-bookworm`, OpenCode pinned 2.1.2) |
+| `Dockerfile` | Image recipe (base `php:8.5-cli-bookworm`, OpenCode version pinned there) |
 | `compose.yaml` | Service `sandbox`, image `sandbox-dev:latest`, container `sandbox-dev`, mounts and volumes |
 | `sandbox.sh` / `sandbox.ps1` | Launchers for Linux/WSL and Windows |
 | `.env.example` → `.env` | Template; `.env` is created by `sandbox.sh`, mode 600, git-ignored |
@@ -91,7 +91,7 @@ Sources of truth: `HANDOVER.md` (what was built, decisions) and `TODO.md`
 Verified current facts:
 
 - Container `sandbox-dev` running image `sandbox-dev:latest`; inside: OpenCode
-  v2.1.2, Claude Code v2.1.316, PHP 8.5.12, Node v22.23.4, user `dev`.
+  (version pinned in the Dockerfile), Claude Code v2.1.316, PHP 8.5.12, Node v22.23.4, user `dev`.
 - Host: Docker Engine 29.9.2 + Compose v5.6.1 in WSL 2 (Ubuntu 26.04, user
   `user2`).
 - `.env` exists with placeholders only; no agent logins or provider

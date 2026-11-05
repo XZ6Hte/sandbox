@@ -51,9 +51,16 @@ first if you want to skip the warnings:
 | `GITHUB_PERSONAL_ACCESS_TOKEN` | `gh` access to issues and pull requests |
 | `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | Optional, instead of interactive login |
 
-For the GitHub token, prefer a fine-grained token limited to the repositories
-you work on, with **read/write** on *Contents*, *Issues* and *Pull requests*.
-A classic token needs `repo` and `read:org`.
+For the GitHub token, use a classic token with the `repo` scope only. A
+fine-grained token (**read/write** on *Contents*, *Issues* and *Pull requests*)
+works only if it can select the repository. Set an expiry, for example 90 days.
+
+Without `read:org`, `gh pr edit` and `gh pr view --json ...` fail (they use
+GraphQL). Change a pull request's body or base through the REST API instead:
+
+```sh
+gh api -X PATCH repos/<owner>/<repo>/pulls/<n> -f body="..."
+```
 
 ## Logging in
 
@@ -67,6 +74,8 @@ Inside the sandbox:
 
 Logins are stored in Docker volumes (`sandbox-claude`, `sandbox-opencode`) and
 survive restarts and rebuilds. `docker compose down -v` deletes them.
+`/home/dev/.claude.json` is not in a volume and is lost when the container is
+recreated, so Claude Code may show its first-run setup again.
 
 ## Working
 
@@ -108,15 +117,22 @@ Two habits keep sessions cheap:
 ├── Dockerfile                  image recipe
 ├── compose.yaml                mounts, env, volumes
 ├── sandbox.sh / sandbox.ps1    preflight checks + shell
+├── .dockerignore               keeps files out of the build context
 ├── .env.example                template for .env (git-ignored)
-├── scripts/entrypoint.sh       git identity, safe.directory, gh helper
+├── AGENTS.md / CLAUDE.md       project notes for coding agents
+├── HANDOVER.md                 state of the setup at handover
+├── TODO.md                     open tasks and current setup notes
+├── scripts/
+│   ├── entrypoint.sh           git identity, safe.directory, gh helper
+│   ├── rotate-token.sh         replace the GitHub token in .env (run on host)
+│   └── install-docker-wsl.sh   install Docker Engine in WSL 2
 ├── config/
 │   ├── skills/                 single source of truth for the workflows
 │   │   ├── plan-item/SKILL.md
 │   │   └── implement-item/SKILL.md
 │   ├── commands/               OpenCode slash commands that load a skill
 │   ├── memory/AGENTS.md        sandbox-wide rules (also Claude's CLAUDE.md)
-│   ├── claude/settings.json    Claude Code permissions
+│   ├── claude/settings.json    Claude Code permissions, default model (sonnet)
 │   └── opencode/opencode.jsonc OpenCode config
 └── workspace/                  your projects (bind mount)
 ```
@@ -141,6 +157,26 @@ recreating the container does not re-download dependencies.
 Changing a skill or command on the host takes effect after restarting
 `opencode` / `claude` (or the container); no rebuild is needed.
 
+## Models
+
+The default model is `sonnet` (`config/claude/settings.json`). `/plan-item`
+runs on Opus (`model: opus` in its skill, `model:` in the OpenCode command).
+The OpenCode `explore` subagent runs on Haiku (`config/opencode/opencode.jsonc`);
+Claude Code's built-in Explore agent already uses Haiku.
+
+## Two accounts and approval
+
+Development and approval are split across two GitHub accounts, for example:
+
+- The agent works as a machine user (here `de-fraengi`); only its token is in
+  the container.
+- A human approver (here `XZ6Hte`) reviews and approves pull requests in the
+  browser. The approver's token must never be in the container.
+- To rotate the machine user's token, run `scripts/rotate-token.sh` on the
+  host, then revoke the old token on GitHub.
+
+See `TODO.md` for the current setup.
+
 ## Security model
 
 - The container is the boundary: no Docker socket, no host home directory, no
@@ -151,9 +187,13 @@ Changing a skill or command on the host takes effect after restarting
   need that, run the sandbox in a VM.
 - The model can read everything inside the container, including `.env` and
   your provider keys. Do not put unrelated secrets in `.env`.
-- `main` is protected by instruction, not by permissions. For real safety,
-  protect the branch on GitHub and give the token a dedicated machine account
-  with the minimum scopes (see the article's outlook).
+- Protect `main` on GitHub, not just by instruction. For example, a ruleset on
+  the target repository: pull request required, 1 approval, the last pusher
+  cannot approve, no bypass actors, required status checks. Rulesets on private
+  repositories need GitHub Pro on the owner account.
+- The agent's token belongs to a dedicated machine user with the minimum scope
+  (`repo`); the approver approves in the browser (see "Two accounts and
+  approval"). `TODO.md` describes the current setup.
 
 ## Common commands
 
@@ -186,7 +226,7 @@ Contents read access.
 **Claude login expired** — start `claude` and run `/login`.
 
 **Build fails at the OpenCode installer** — the image installs OpenCode 2 from
-`https://opencode.ai/v2/install` and pins `2.1.2` in the Dockerfile. Bump or
+`https://opencode.ai/v2/install` and pins the version in the Dockerfile. Bump or
 drop `--version` there to move to a newer release. OpenCode 1 uses the other
 installer (`https://opencode.ai/install`), which refuses 2.x versions. The
 binary lands in `/home/dev/.opencode/bin/opencode` and is symlinked to

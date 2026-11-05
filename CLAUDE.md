@@ -64,7 +64,7 @@ workflow inside the sandbox: `/plan-item <issue-url>` then
   OpenCode 1 rejecting V2 `permissions` is stale (only OpenCode 2 runs).
   Adding V2 rules is an open TODO; the container is the security boundary.
 - Do not put unrelated secrets in `.env`; the model can read it.
-- OpenCode 2.1.2 is pinned in the Dockerfile (installer
+- OpenCode is pinned in the Dockerfile (installer
   `https://opencode.ai/v2/install`); the real binary is
   `/home/dev/.opencode/bin/opencode`, symlinked as `/usr/local/bin/opencode`
   and `opencode2`.
@@ -75,7 +75,7 @@ workflow inside the sandbox: `/plan-item <issue-url>` then
 
 Working: Docker Engine 29.9.2 in WSL 2 (Ubuntu 26.04, user `user2`), image
 `sandbox-dev:latest`, container `sandbox-dev` running from it. In the container:
-OpenCode 2.1.2, Claude Code 2.1.316, PHP 8.5.12, Node 22.23.4, user `dev`,
+OpenCode (version pinned in the Dockerfile), Claude Code 2.1.316, PHP 8.5.12, Node 22.23.4, user `dev`,
 working dir `/workspace`; HANDOVER also reports Composer 2.11.1, Bun 1.4.4 and
 gh 2.103.3. Docker Desktop is not installed (by decision).
 
@@ -105,6 +105,6 @@ not in the container). History: `4a1cfd5 "Initial commit"` (GitHub README),
   ruleset (PR + 1 human approval, no force push, no bypass for the bot), store
   the credential in `.env`, recreate the container, verify with `gh auth status`
   and a test branch/PR.
-- Optional: bump OpenCode 2.1.2 -> 2.2.5; add V2 `permissions` to
+- Optional: bump the pinned OpenCode version in the Dockerfile; add V2 `permissions` to
   `opencode.jsonc`; cheap model for an `explore` subagent / strong one for
   `/plan-item`; BuildKit cache mounts.
