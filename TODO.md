@@ -37,17 +37,36 @@ Context:
 
 ### Open items (2026-11-02)
 
-- [ ] Merge PR #1 (`todo-env-done`): `main-protect` ruleset requires 1 approval
-      and the author cannot self-approve, `--admin` bypass is not allowed. In
-      the browser (`/rules/26386895`) set "Required approvals" to 0 for this
-      solo repo (keep "Require a pull request", no bypass for `de-fraengi`),
-      then `gh pr merge 1 --squash --delete-branch`, `git checkout main && git pull`.
+- [x] Merge PR #1 (`todo-env-done`): merged 2026-11-05 (squash, df3224e).
+      Ruleset `main-protect` now has Required approvals = 0, no bypass actors,
+      PR still required, force-push and deletion blocked.
+- [ ] Restore Required approvals to 1 once a second reviewer exists.
 - [ ] Add `de-fraengi` as collaborator (write) on the target repo(s).
 - [ ] Verify token expiry/permissions of the `de-fraengi` token; set rotation
-      reminder.
+      reminder. (Partial: the token currently in use is the `XZ6Hte` one, which
+      expires 2027-01-31 17:54 UTC, see audit below.)
 - [ ] Log in to Claude Code / OpenCode inside the container.
 - [ ] `OPENAI_API_KEY` in `.env` is empty (optional).
 - [ ] Always work on feature branches; direct pushes to `main` are rejected.
+- [ ] Create a fine-grained token under `de-fraengi` limited to selected
+      repos, replace it in `.env`, run `docker compose up -d --force-recreate`,
+      re-run `gh auth status` (must show `de-fraengi`).
+- [ ] Set a calendar reminder for rotation before 2027-01-31 (or the new
+      token's expiry).
+
+#### Audit 2026-11-05
+
+- The container's `GH_TOKEN` authenticates as `XZ6Hte` (owner account), NOT the
+  machine user `de-fraengi`. It is a fine-grained PAT, expires 2027-01-31
+  17:54 UTC.
+- Through that token `gh repo list` shows ADMIN on four repos: XZ6Hte/sandbox,
+  XZ6Hte/TV, XZ6Hte/XZ6Hte, XZ6Hte/BTC-AG.com, which is broader than the
+  intended "selected repositories only" scope. (The agent can read `.env`, so
+  this is the blast radius.)
+- `de-fraengi` is not a collaborator on XZ6Hte/sandbox and has no pending
+  invitation.
+- `workspace/` contains only `.gitkeep` (no target repo cloned yet).
+- Ruleset `main-protect`: active, 1 ruleset, 0 approvals, no bypass.
 
 ### Option A — machine user with fine-grained token (recommended)
 
