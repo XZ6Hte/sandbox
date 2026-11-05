@@ -64,6 +64,8 @@ only records what was done, the current state and the open items.
 | Claude Code (container, host) | 2.1.316 / 2.1.316 |
 | `.env` | present, mode 600, placeholders only |
 
+Later: container OpenCode 2.2.5 / Claude Code 2.1.318, see `TODO.md`.
+
 Named volumes: logins (`sandbox-claude`, `sandbox-opencode`) and package caches
 (`sandbox-composer-cache`, `sandbox-composer-config`, `sandbox-npm-cache`,
 `sandbox-bun-cache`). They survive restarts and rebuilds; `docker compose down
@@ -77,8 +79,8 @@ Named volumes: logins (`sandbox-claude`, `sandbox-opencode`) and package caches
    in").
 3. ~~Commit this repository~~ — done: branch `main` tracks `origin/main`
    (GitHub); the old remote `master` branch was deleted (only `main` remains).
-4. Optional: bump OpenCode from the pinned `2.1.2` (upstream latest is 2.2.5)
-   in the Dockerfile and rebuild.
+4. ~~Optional: bump OpenCode from the pinned `2.1.2`~~ (done 2026-11-05:
+   bumped to 2.2.5, see `TODO.md`)
 5. Optional: add V2 `permissions` rules to `config/opencode/opencode.jsonc` now
    that only OpenCode 2 runs in the image.
 6. Optional for real safety: branch protection on GitHub plus a dedicated
