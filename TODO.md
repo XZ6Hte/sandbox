@@ -52,7 +52,7 @@ kept below as an alternative.
 - Token: classic PAT, scope `repo` only, expires 2027-02-03 17:28 UTC (a
   fine-grained token was not tried; it would need to select a repository owned
   by another user). Stored as `GITHUB_PERSONAL_ACCESS_TOKEN` in `.env`
-  (mode 600, gitignored). Git identity in `.env`: `de-fraengi` with its
+  (gitignored, readable only by the owner and the local group `shared`). Git identity in `.env`: `de-fraengi` with its
   noreply address.
 - Ruleset `main-protect` on `satzart` (id 26631397): pull request required,
   1 approval, stale approvals dismissed, last pusher cannot approve,
@@ -75,6 +75,8 @@ History:
   the subscription login.
 - Decided 2026-11-05: no OpenAI key (not needed); the empty ruleset `Protect`
   on `satzart` was deleted.
+- 2026-11-05: docs refreshed (PR #11 README, PR #12 `AGENTS.md` as the single
+  reference, short `CLAUDE.md`, dated update in `HANDOVER.md`).
 - 2026-11-05: `satzart` PR #27 (closes `T-065`, decision "GitHub Pro: yes")
   was opened by `de-fraengi` from the container, approved by `XZ6Hte` and
   merged (merge commit `ff5d517`): the full review flow works end to end.
