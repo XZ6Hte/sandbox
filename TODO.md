@@ -4,8 +4,16 @@ Captured 2026-11-01, for later.
 
 ## GitHub identity for the sandbox
 
-Decision (2026-11-02): **Option A, machine user `de-fraengi`** with fine-grained
-token. Option B (GitHub App) stays documented below as an alternative.
+Decision (2026-11-02): **Option A, machine user `de-fraengi`**. Option B
+(GitHub App) stays documented below as an alternative.
+
+Roles (2026-11-05): `de-fraengi` develops inside the container (its token is
+the only one in `.env`); `XZ6Hte` reviews and approves in the browser. The
+approver's token must never be in the container. `de-fraengi` has Write on
+`XZ6Hte/satzart`, no admin. The token is a classic PAT with scope `repo` only
+(a fine-grained token was not tried), 90 days, expires 2027-02-03. Rulesets on
+private repos need GitHub Pro on the owner account (`XZ6Hte`, bought
+2026-11-05).
 
 Context:
 
@@ -22,44 +30,54 @@ Context:
 
 ### Prerequisites (both options)
 
-- [ ] Clone the target repository into `workspace/<name>` (currently only
-      `.gitkeep`).
-- [ ] Create a ruleset on the target repository: require a pull request,
-      require 1 human approval (the sandbox repo itself is at 0, see open
-      items), dismiss stale approvals, require conversation
-      resolution, block force pushes, restrict deletions. Add required status
+- [x] Clone the target repository into `workspace/<name>` (done:
+      `workspace/satzart`).
+- [x] Create a ruleset on the target repository: require a pull request,
+      require 1 human approval, dismiss stale approvals, require conversation
+      resolution, block force pushes, restrict deletions (done on
+      `XZ6Hte/satzart`: ruleset `main-protect`, id 26631397; the sandbox repo
+      itself stays at 0 approvals, see open items). Add required status
       checks if CI exists.
-- [ ] Make sure neither the machine user nor the App is in the ruleset's
-      bypass list.
+- [x] Make sure neither the machine user nor the App is in the ruleset's
+      bypass list (empty on `satzart`).
 - [x] Store the credential in `.env` (mode 600, gitignored) and recreate the
       container: `docker compose up -d --force-recreate`.
-- [ ] Verify inside the sandbox: `gh auth status`, push a test branch, open a
-      test PR, confirm `main` rejects direct pushes.
+- [x] Verify inside the sandbox: `gh auth status`, push a test branch, open a
+      test PR, confirm `main` rejects direct pushes (done 2026-11-05: logged in
+      as `de-fraengi`; direct push to `main` rejected; test PR #26 showed
+      REVIEW_REQUIRED and was closed unmerged).
 
 ### Open items (2026-11-02)
 
 - [x] Merge PR #1 (`todo-env-done`): merged 2026-11-05 (squash, df3224e).
       Ruleset `main-protect` now has Required approvals = 0, no bypass actors,
       PR still required, force-push and deletion blocked.
-- [ ] Restore Required approvals to 1 in ruleset `main-protect`
-      (`/rules/26386895`) once a second reviewer exists or the container token
-      is no longer the owner's (keep "Require a pull request", no bypass
-      actors).
-- [ ] Add `de-fraengi` as collaborator (write) on the target repo(s).
-- [ ] Verify token expiry/permissions of the `de-fraengi` token; set rotation
-      reminder. (Partial: the token currently in use is the `XZ6Hte` one, which
-      expires 2027-01-31 17:54 UTC, see audit below.)
-- [ ] Log in to Claude Code / OpenCode inside the container.
+- [ ] Optional: restore Required approvals to 1 in the sandbox repo's ruleset
+      `main-protect` (`/rules/26386895`). Left at 0 on purpose: the agent works
+      in `satzart`, not here, and a solo author cannot approve their own PR.
+- [x] Add `de-fraengi` as collaborator (write) on the target repo
+      (`XZ6Hte/satzart`, accepted 2026-11-05).
+- [x] Verify token expiry/permissions of the `de-fraengi` token: classic,
+      scope `repo`, expires 2027-02-03 16:46 UTC. Reaches only repos
+      `de-fraengi` was invited to.
+- [x] Log in to Claude Code inside the container (reported by the user
+      2026-11-05).
+- [ ] Log in to OpenCode inside the container.
 - [ ] `OPENAI_API_KEY` in `.env` is empty (optional).
 - [ ] Always work on feature branches; direct pushes to `main` are rejected.
-- [ ] Create a fine-grained token under `de-fraengi` limited to selected
-      repos, replace it in `.env`, run `docker compose up -d --force-recreate`,
-      re-run `gh auth status` (must show `de-fraengi`), then remove the
-      `XZ6Hte` token from `.env` and revoke it on GitHub.
-- [ ] Set a calendar reminder for rotation before 2027-01-31 (or the new
-      token's expiry).
+- [x] Replace the `.env` token with one from `de-fraengi`, recreate the
+      container, `gh auth status` shows `de-fraengi` (done 2026-11-05).
+- [ ] Revoke the old `XZ6Hte` token (it saw four repos, expires 2027-01-31) on
+      GitHub: Settings → Developer settings.
+- [ ] Set a calendar reminder for rotation before 2027-02-03.
+- [ ] Optional: delete the disabled, empty ruleset `Protect` (id 26316341) on
+      `satzart`; it is superseded by `main-protect`.
 
-#### Audit 2026-11-05
+#### Audit 2026-11-05 (historical, findings below were fixed the same day)
+
+Resolution: `.env` now holds the `de-fraengi` token (classic, `repo`, expires
+2027-02-03); `satzart` has an active ruleset with 1 required approval and no
+bypass. Open: revoke the old `XZ6Hte` token.
 
 - The container's `GH_TOKEN` authenticates as `XZ6Hte` (owner account), NOT the
   machine user `de-fraengi`. It is presumably a fine-grained PAT (no
@@ -85,18 +103,19 @@ design, no hourly expiry, simplest to operate. Trade-off: long-lived token,
 consumes a seat on paid org plans, commits attributed to the machine account.
 
 - [x] Create the machine-user account (`de-fraengi`).
-- [ ] Give it access to the selected repositories (collaborator or team);
-      not done, see audit 2026-11-05.
-- [ ] Create a fine-grained personal access token for that account, restricted
-      to selected repositories:
+- [x] Give it access to the selected repositories (collaborator or team):
+      `XZ6Hte/satzart`, Write.
+- [x] Create a personal access token for that account. Done as a classic PAT
+      with `repo` only. A fine-grained token would be preferable if it can
+      select a repository owned by another user (not tried); if so, use:
       - Contents: read/write (clone, branch, push)
       - Issues: read/write (`/plan-item` comments)
       - Pull requests: read/write (open/update PRs)
       - Workflows: read/write only if the agent may change `.github/workflows/*`
       - Metadata: read (automatic)
-- [ ] Set an expiry (e.g. 90 days) and a calendar reminder to rotate.
-- [x] Put it in `.env` as `GITHUB_PERSONAL_ACCESS_TOKEN` (currently holds the
-      `XZ6Hte` owner token, not the machine user's; see audit 2026-11-05).
+- [x] Set an expiry: 90 days (2027-02-03). Calendar reminder: still open.
+- [x] Put it in `.env` as `GITHUB_PERSONAL_ACCESS_TOKEN` (now the `de-fraengi`
+      token).
 - [ ] Rotate later by editing `.env` and recreating the container.
 
 ### Option B — GitHub App
@@ -130,9 +149,9 @@ because `gh` reads `GH_TOKEN` only at start.
 
 ## Later, unrelated
 
-- [x] Fill `.env`: git identity and GitHub token (done; the token is the
-      wrong account's, see audit 2026-11-05).
-- [ ] Log in to OpenCode and Claude Code inside the container.
+- [x] Fill `.env`: git identity (`de-fraengi`, noreply address) and GitHub
+      token (done 2026-11-05).
+- [ ] Log in to OpenCode inside the container (Claude Code is done).
 - [x] Make the first commit of the sandbox repository (done; remote `origin` set up).
 - [ ] Optional: OpenCode 2.1.2 → 2.2.5 (bump the pin in the Dockerfile).
 - [ ] Optional: model right-sizing — cheap model for an `explore` subagent,
