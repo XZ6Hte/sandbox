@@ -66,10 +66,13 @@ Context:
       shows Anthropic stored plus `ANTHROPIC_API_KEY` from the environment;
       OpenCode is v2.2.5).
 - [ ] `OPENAI_API_KEY` in `.env` is empty (optional).
-- [ ] Note: Claude Code and OpenCode probably authenticate with
-      `ANTHROPIC_API_KEY` from `.env` (no `~/.claude/.credentials.json`), so
-      usage is billed per API call and the agent can read the key: use a key
-      with a spending limit.
+- [ ] Claude Code in the container bills via API (`/status` 2026-11-05: "API
+      Usage Billing", Opus 5.5), using `ANTHROPIC_API_KEY` from `.env`; the
+      agent can read the key. Set a monthly spending limit on the key in the
+      Anthropic Console, and consider Sonnet as the default model
+      (`config/claude/settings.json`). Alternative: remove the key from `.env`
+      and use `/login` with a Pro subscription (OpenCode then needs its own
+      login or key).
 - [ ] Note: `/home/dev/.claude.json` is not in a volume and is lost on
       `--force-recreate`; Claude Code may ask for its first-run setup again.
 - [ ] Always work on feature branches; direct pushes to `main` are rejected.
