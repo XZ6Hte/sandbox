@@ -8,30 +8,31 @@ at `/home/dev/TODO.md`), so keep it short and factual.
 Tasks:
 
 - [ ] Rotate the `de-fraengi` token before **2027-02-03** (calendar reminder is
-      set). Rotate by editing `.env` and running
-      `docker compose up -d --force-recreate`; then `gh auth status` must show
-      `de-fraengi`.
-- [ ] `satzart`: decide the first task for the agent (no application code
-      exists yet: no `composer.json`, no `artisan`; only `docs/`, `.ai/`,
-      `.claude/`, `AGENTS.md`).
-- [ ] `satzart`: close `T-065` in `docs/todo.yaml` (GitHub Pro is bought, ruleset
-      `main-protect` is active) and decide whether to add the required check
-      `agent-guard` to the ruleset (only if the check exists in `.github/`).
+      set): run `scripts/rotate-token.sh` on the host. It checks the new token
+      belongs to `de-fraengi`, rewrites `.env`, recreates the container and
+      verifies. Then revoke the old token on GitHub.
+- [ ] `satzart`: decide the first task for the agent (postponed). No
+      application code exists yet: no `composer.json`, no `artisan`; only
+      `docs/`, `.ai/`, `.claude/`, `AGENTS.md`.
+- [ ] `satzart`: decide whether to add the required status check `agent-guard`
+      to ruleset `main-protect`. The workflow exists
+      (`.github/workflows/agent-guard.yml`, jobs `hooks` and `immutable`);
+      the T-065 close-out PR (decision "GitHub Pro: yes") is open there.
 
 Optional:
 
-- [ ] Delete the disabled, empty ruleset `Protect` (id 26316341) on `satzart`;
-      it is superseded by `main-protect`.
-- [ ] Check that the Dockerfile pin for OpenCode matches the running version
-      (container runs OpenCode 2.2.5).
-- [ ] Fill `OPENAI_API_KEY` in `.env` (empty).
-- [ ] Model right-sizing: cheap model for an `explore` subagent, strong model
-      for `/plan-item`. Default model is `sonnet` (`config/claude/settings.json`).
-- [ ] BuildKit cache mounts so image rebuilds do not re-download.
+- [ ] BuildKit cache mounts (`--mount=type=cache`) so image rebuilds do not
+      re-download. Only if rebuilds become frequent.
 
 ## Rules and notes
 
 - Always work on feature branches; direct pushes to `main` are rejected.
+- Models: default `sonnet` (`config/claude/settings.json`); `/plan-item` uses
+  Opus (`model: opus` in its skill, `model:` in the OpenCode command); the
+  OpenCode `explore` subagent uses Haiku (`config/opencode/opencode.jsonc`).
+  Claude Code's built-in Explore agent already runs on Haiku.
+- OpenCode is pinned to 2.2.5 in the `Dockerfile` (takes effect on the next
+  `./sandbox.sh build`; not tested with a rebuild yet).
 - The token of the approver (`XZ6Hte`) must never be in the container; only the
   `de-fraengi` token is.
 - The sandbox repo's own ruleset `main-protect` (`/rules/26386895`) stays at
@@ -75,6 +76,8 @@ History:
   here).
 - Claude Code in the container first billed via API key (Opus 5.5); switched to
   the subscription login.
+- Decided 2026-11-05: no OpenAI key (not needed); the empty ruleset `Protect`
+  on `satzart` was deleted.
 
 ## Alternative: Option B — GitHub App (not planned)
 

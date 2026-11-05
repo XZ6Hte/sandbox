@@ -1,7 +1,13 @@
 {
-  "$schema": "https://opencode.ai/config.json"
+  "$schema": "https://opencode.ai/config.json",
 
-  // Intentionally minimal: the installed OpenCode 1 rejects the V2
-  // "permissions" array, and the sandbox container is the security boundary.
-  // Skills are invoked through the slash commands in config/commands.
+  // Cheap model for the read-only explore subagent; /plan-item runs on Opus
+  // (see config/commands/plan-item.md). Everything else uses the default.
+  "agent": {
+    "explore": { "model": "anthropic/claude-haiku-5-5" }
+  }
+
+  // Intentionally minimal otherwise: the sandbox container is the security
+  // boundary. Skills are invoked through the slash commands in config/commands.
+  // Adding V2 "permissions" rules is an open idea, not done.
 }

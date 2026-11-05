@@ -2,6 +2,7 @@
 name: plan-item
 description: Plan a GitHub issue before writing code. Research the repository, ask the open questions, define testable acceptance criteria and post the plan as an issue comment. Invoke only when the user runs /plan-item.
 disable-model-invocation: true
+model: opus
 ---
 
 # Plan a work item
