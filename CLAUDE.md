@@ -9,6 +9,8 @@ live in `workspace/`.
 commands, validation, rules, security model, how to work in this repo). Current
 state and open work: `TODO.md`. This file only adds Claude-specific points.
 
+@AGENTS.md
+
 ## Claude-specific
 
 - Both skills in `config/skills/` have `disable-model-invocation: true`; they

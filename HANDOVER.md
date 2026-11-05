@@ -92,7 +92,7 @@ only records what was done, the current state and the open items.
 | Node / Bun / gh | 22.23.4 / 1.4.4 / 2.103.3 |
 | OpenCode (container, host) | v2.1.2 / v2.1.2 |
 | Claude Code (container, host) | 2.1.316 / 2.1.316 |
-| `.env` | present, placeholders only (at handover time) |
+| `.env` | present, mode 600, placeholders only (at handover time) |
 
 Later: container OpenCode 2.2.5 / Claude Code 2.1.318, see `TODO.md`.
 

@@ -13,8 +13,9 @@ container are separate — see the pointer at the end.
   which is a bind mount, git-ignored in practice (only `workspace/.gitkeep` is
   tracked), and must never be edited from here.
 - Git: branch `main`, remote `origin` = `https://github.com/XZ6Hte/sandbox.git`
-  (`main` tracks `origin/main`). On 2026-11-05: 27 tracked files, 16 commits
-  (read live: `git ls-files | wc -l`, `git log --oneline | wc -l`).
+  (`main` tracks `origin/main`). Read counts live: `git ls-files | wc -l`,
+  `git log --oneline main | wc -l` (2026-11-05, before PR #12: 27 files,
+  16 commits on `main`).
   `HANDOVER.md` is a dated log, so older statements in it can be outdated.
 - Purpose: modelled on the c't article "Schluss mit Vibe-Coding" (Jan Mahn,
   2026-10-16). The coding agent runs inside the container; only the
@@ -36,7 +37,7 @@ container are separate — see the pointer at the end.
 | `README.md` | Operational reference (setup, logins, daily use, troubleshooting) |
 | `TODO.md` | Backlog and current decisions; mounted read-only as `/home/dev/TODO.md` |
 | `HANDOVER.md` | Dated history of how the sandbox was built |
-| `config/skills/{plan-item,implement-item}/SKILL.md` | Single source of truth for the two workflows |
+| `config/skills/{plan-item,implement-item}/` | Single source of truth for the two workflows (`SKILL.md` and `references/`) |
 | `config/commands/{plan-item,implement-item}.md` | OpenCode slash-command wrappers for the skills |
 | `config/memory/AGENTS.md` | Sandbox-wide rules, mounted read-only into both agents |
 | `config/claude/settings.json` | Claude Code permissions and default model (`sonnet`) |
@@ -97,9 +98,6 @@ committing, check the things you touched, for example:
   or the container — no rebuild.
 - For target projects inside `workspace/`: never commit to `main`; one issue,
   one branch, one pull request. The human reviews and merges.
-- Skills/commands under `config/` need a restart of `claude`/`opencode` (or the
-  container); Dockerfile changes need `./sandbox.sh build`; after editing `.env`
-  run `docker compose up -d --force-recreate`.
 
 ## Security model (short version)
 
