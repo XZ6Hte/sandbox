@@ -1,8 +1,38 @@
 # Handover — Sandbox Build
 
-Status: **working** (2026-11-01). Docker, image, container and both coding
-agents are installed and verified. What is left is your personal data in
-`.env` and the interactive logins.
+## Update 2026-11-05
+
+The sandbox is fully set up: `.env` is filled and the logins (Claude Code,
+OpenCode) are done. The sections below are the history as of 2026-11-01;
+open work is in [`TODO.md`](TODO.md), the detailed reference is `AGENTS.md`.
+
+| Item (live values, 2026-11-05) | Value |
+| --- | --- |
+| Docker Compose | v5.7.0 |
+| Claude Code (container) | 2.1.318 |
+| OpenCode (container) | v2.2.5 |
+| Image `sandbox-dev:latest` | 2.69 GB |
+
+Volume names: `docker volume ls` shows them with the project prefix `sandbox_`
+(e.g. `sandbox_sandbox-claude`); `compose.yaml` uses the short names.
+
+Decisions of 2026-11-05 (details in `TODO.md`):
+
+- Machine user `de-fraengi` develops in the container; `XZ6Hte` approves in the
+  browser. The approver's token never enters the container.
+- Rulesets (`main-protect`) protect `main`; they need GitHub Pro on `XZ6Hte`
+  (bought 2026-11-05).
+- Claude Code uses the subscription login (`/login`), not an API key.
+- Models: Sonnet default, Opus for `/plan-item`, Haiku for OpenCode's `explore`.
+- `scripts/rotate-token.sh` replaces the GitHub token in `.env` and recreates
+  the container.
+- `.env` is readable only by the owner and the local group `shared`.
+
+---
+
+Status at handover time: **working** (2026-11-01). Docker, image, container and both coding
+agents are installed and verified. What was left then: personal data in
+`.env` and the interactive logins (done since).
 
 **Start guide:** see [`README.md`](README.md) — it is the operational reference
 (requirements, first run, logins, daily commands, troubleshooting). This file
@@ -43,14 +73,14 @@ only records what was done, the current state and the open items.
   on this machine, and Linux paths in `compose.yaml` work unchanged.
 - **One skill source, two agents.** The same `SKILL.md` serves Claude Code and
   OpenCode; only OpenCode needs the command wrappers.
-- **Minimal OpenCode config.** OpenCode 1 rejected the V2 `permissions` array,
+- **Minimal OpenCode config (at handover time; `explore` now runs on Haiku).** OpenCode 1 rejected the V2 `permissions` array,
   so the config is `$schema` only. The container is the security boundary.
 - **Passwordless sudo inside the container** so the agent can `apt-get install`
   tools. A convenience, not a security boundary.
 - **`disable-model-invocation: true`** on both skills: they are only invoked
   explicitly, not by the model on its own.
 
-## Current state
+## Current state (at handover time, 2026-11-01)
 
 | Item | Value |
 | --- | --- |
@@ -62,7 +92,7 @@ only records what was done, the current state and the open items.
 | Node / Bun / gh | 22.23.4 / 1.4.4 / 2.103.3 |
 | OpenCode (container, host) | v2.1.2 / v2.1.2 |
 | Claude Code (container, host) | 2.1.316 / 2.1.316 |
-| `.env` | present, mode 600, placeholders only |
+| `.env` | present, placeholders only (at handover time) |
 
 Later: container OpenCode 2.2.5 / Claude Code 2.1.318, see `TODO.md`.
 
@@ -71,7 +101,7 @@ Named volumes: logins (`sandbox-claude`, `sandbox-opencode`) and package caches
 `sandbox-bun-cache`). They survive restarts and rebuilds; `docker compose down
 -v` deletes them.
 
-## Open items
+## Open items (at handover time; current list: `TODO.md`)
 
 1. Fill `.env` — git identity is still `Your Name <you@example.com>` and the
    GitHub token is empty.
