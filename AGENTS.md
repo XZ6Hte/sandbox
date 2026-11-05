@@ -91,7 +91,7 @@ Sources of truth: `HANDOVER.md` (what was built, decisions) and `TODO.md`
 Verified current facts:
 
 - Container `sandbox-dev` running image `sandbox-dev:latest`; inside: OpenCode
-  (version pinned in the Dockerfile), Claude Code v2.1.316, PHP 8.5.12, Node v22.23.4, user `dev`.
+  (version pinned in the Dockerfile), Claude Code v2.1.318, PHP 8.5.12, Node v22.23.4, user `dev`.
 - Host: Docker Engine 29.9.2 + Compose v5.6.1 in WSL 2 (Ubuntu 26.04, user
   `user2`).
 - `.env` exists with placeholders only; no agent logins or provider

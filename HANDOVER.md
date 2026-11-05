@@ -26,8 +26,8 @@ only records what was done, the current state and the open items.
    skills and commands confirmed as loaded.
 5. **Upgraded OpenCode to 2.x** — the V1 installer
    (`https://opencode.ai/install`) refuses 2.x by design. The Dockerfile now
-   uses `https://opencode.ai/v2/install`, pinned in the Dockerfile (no
-   number here, it changes), with direct symlinks (`opencode` and `opencode2`).
+   uses `https://opencode.ai/v2/install`, pinned to **2.1.2**, with direct
+   symlinks (`opencode` and `opencode2`). Verified: `opencode v2.1.2`.
 6. **Checked Claude Code** — already installed natively on the host and in the
    image, both **2.1.316** (current latest); host install is logged in (Pro)
    and `claude doctor` reports no issues.
@@ -60,9 +60,11 @@ only records what was done, the current state and the open items.
 | Container | `sandbox-dev`, running |
 | PHP / Composer | 8.5.12 / 2.11.1 |
 | Node / Bun / gh | 22.23.4 / 1.4.4 / 2.103.3 |
-| OpenCode (container, host) | version pinned in the Dockerfile |
+| OpenCode (container, host) | v2.1.2 / v2.1.2 |
 | Claude Code (container, host) | 2.1.316 / 2.1.316 |
 | `.env` | present, mode 600, placeholders only |
+
+Later: container OpenCode 2.2.5 / Claude Code 2.1.318, see `TODO.md`.
 
 Named volumes: logins (`sandbox-claude`, `sandbox-opencode`) and package caches
 (`sandbox-composer-cache`, `sandbox-composer-config`, `sandbox-npm-cache`,
@@ -77,7 +79,8 @@ Named volumes: logins (`sandbox-claude`, `sandbox-opencode`) and package caches
    in").
 3. ~~Commit this repository~~ — done: branch `main` tracks `origin/main`
    (GitHub); the old remote `master` branch was deleted (only `main` remains).
-4. Optional: bump the OpenCode version pinned in the Dockerfile and rebuild.
+4. ~~Optional: bump OpenCode from the pinned `2.1.2`~~ (done 2026-11-05:
+   bumped to 2.2.5, see `TODO.md`)
 5. Optional: add V2 `permissions` rules to `config/opencode/opencode.jsonc` now
    that only OpenCode 2 runs in the image.
 6. Optional for real safety: branch protection on GitHub plus a dedicated

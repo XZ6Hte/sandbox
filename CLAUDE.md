@@ -75,9 +75,9 @@ workflow inside the sandbox: `/plan-item <issue-url>` then
 
 Working: Docker Engine 29.9.2 in WSL 2 (Ubuntu 26.04, user `user2`), image
 `sandbox-dev:latest`, container `sandbox-dev` running from it. In the container:
-OpenCode (version pinned in the Dockerfile), Claude Code 2.1.316, PHP 8.5.12, Node 22.23.4, user `dev`,
-working dir `/workspace`; HANDOVER also reports Composer 2.11.1, Bun 1.4.4 and
-gh 2.103.3. Docker Desktop is not installed (by decision).
+OpenCode (version pinned in the Dockerfile), Claude Code 2.1.316, PHP 8.5.12,
+Node 22.23.4, user `dev`, working dir `/workspace`; HANDOVER also reports
+Composer 2.11.1, Bun 1.4.4 and gh 2.103.3. Docker Desktop is not installed (by decision).
 
 `.env` exists (mode 600) but holds placeholders only: `USER_UID`/`USER_GID`,
 `GIT_USER_NAME`/`GIT_USER_EMAIL`, the GitHub token and provider keys are empty.
@@ -105,6 +105,5 @@ not in the container). History: `4a1cfd5 "Initial commit"` (GitHub README),
   ruleset (PR + 1 human approval, no force push, no bypass for the bot), store
   the credential in `.env`, recreate the container, verify with `gh auth status`
   and a test branch/PR.
-- Optional: bump the pinned OpenCode version in the Dockerfile; add V2 `permissions` to
-  `opencode.jsonc`; cheap model for an `explore` subagent / strong one for
-  `/plan-item`; BuildKit cache mounts.
+- Optional: bump the pinned OpenCode version in the Dockerfile; add V2
+  `permissions` to `opencode.jsonc`; BuildKit cache mounts.

@@ -53,10 +53,14 @@ first if you want to skip the warnings:
 
 For the GitHub token, use a classic token with the `repo` scope only. A
 fine-grained token (**read/write** on *Contents*, *Issues* and *Pull requests*)
-works only if it can select the repository. Set an expiry, for example 90 days.
+only reaches repositories owned by its own account or an organization; it
+cannot reach a repo where the machine user is only a collaborator (not tested
+here). Set an expiry, for example 90 days.
 
-Without `read:org`, `gh pr edit` and `gh pr view --json ...` fail (they use
-GraphQL). Change a pull request's body or base through the REST API instead:
+Without `read:org`, `gh pr edit` and the default `gh pr view` output fail with
+a GraphQL scope error. `gh pr view --json title,body,...` with plain fields
+still works. Change a pull request's body or base through the REST API
+instead:
 
 ```sh
 gh api -X PATCH repos/<owner>/<repo>/pulls/<n> -f body="..."
@@ -172,7 +176,9 @@ Development and approval are split across two GitHub accounts, for example:
   the container.
 - A human approver (here `XZ6Hte`) reviews and approves pull requests in the
   browser. The approver's token must never be in the container.
-- To rotate the machine user's token, run `scripts/rotate-token.sh` on the
+- The machine user has Write on the target repository, no admin rights.
+- To rotate the machine user's token, run `scripts/rotate-token.sh [login]`
+  (the login defaults to `de-fraengi`) on the
   host, then revoke the old token on GitHub.
 
 See `TODO.md` for the current setup.
@@ -189,7 +195,8 @@ See `TODO.md` for the current setup.
   your provider keys. Do not put unrelated secrets in `.env`.
 - Protect `main` on GitHub, not just by instruction. For example, a ruleset on
   the target repository: pull request required, 1 approval, the last pusher
-  cannot approve, no bypass actors, required status checks. Rulesets on private
+  cannot approve, no bypass actors, required status checks, force push and
+  deletion blocked. Rulesets on private
   repositories need GitHub Pro on the owner account.
 - The agent's token belongs to a dedicated machine user with the minimum scope
   (`repo`); the approver approves in the browser (see "Two accounts and
@@ -221,7 +228,7 @@ login.
 
 **`gh` cannot comment** — check `gh auth status`; the token needs Issues and
 Pull request write access on that repository. Private repositories also need
-Contents read access.
+Contents read access. For a classic token: the `repo` scope.
 
 **Claude login expired** — start `claude` and run `/login`.
 
