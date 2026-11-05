@@ -14,10 +14,9 @@ Tasks:
 - [ ] `satzart`: decide the first task for the agent (postponed). No
       application code exists yet: no `composer.json`, no `artisan`; only
       `docs/`, `.ai/`, `.claude/`, `AGENTS.md`.
-- [ ] `satzart`: decide whether to add the required status check `agent-guard`
-      to ruleset `main-protect`. The workflow exists
-      (`.github/workflows/agent-guard.yml`, jobs `hooks` and `immutable`);
-      the T-065 close-out PR (decision "GitHub Pro: yes") is open there.
+- [ ] `satzart`: approve and merge PR #27 (closes `T-065`, decision "GitHub
+      Pro: yes") as `XZ6Hte`. The required checks `hooks` and `immutable`
+      (jobs of `agent-guard.yml`) are already in ruleset `main-protect`.
 
 Optional:
 
@@ -31,8 +30,8 @@ Optional:
   Opus (`model: opus` in its skill, `model:` in the OpenCode command); the
   OpenCode `explore` subagent uses Haiku (`config/opencode/opencode.jsonc`).
   Claude Code's built-in Explore agent already runs on Haiku.
-- OpenCode is pinned to 2.2.5 in the `Dockerfile` (takes effect on the next
-  `./sandbox.sh build`; not tested with a rebuild yet).
+- OpenCode is pinned to 2.2.5 in the `Dockerfile`. Rebuild tested 2026-11-05:
+  OpenCode 2.2.5, Claude Code 2.1.318, logins and `de-fraengi` identity intact.
 - The token of the approver (`XZ6Hte`) must never be in the container; only the
   `de-fraengi` token is.
 - The sandbox repo's own ruleset `main-protect` (`/rules/26386895`) stays at
@@ -60,7 +59,8 @@ kept below as an alternative.
   noreply address.
 - Ruleset `main-protect` on `satzart` (id 26631397): pull request required,
   1 approval, stale approvals dismissed, last pusher cannot approve,
-  conversations resolved, force push and deletion blocked, no bypass actors.
+  conversations resolved, force push and deletion blocked, no bypass actors,
+  required status checks `hooks` and `immutable`.
   Rulesets on private repos need GitHub Pro on `XZ6Hte` (bought 2026-11-05).
 - Verified in the container: `gh auth status` shows `de-fraengi`; a direct
   push to `main` is rejected; a test PR showed REVIEW_REQUIRED and was closed
