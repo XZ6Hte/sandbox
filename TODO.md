@@ -58,29 +58,27 @@ Context:
 - [x] Add `de-fraengi` as collaborator (write) on the target repo
       (`XZ6Hte/satzart`, accepted 2026-11-05).
 - [x] Verify token expiry/permissions of the `de-fraengi` token: classic,
-      scope `repo`, expires 2027-02-03 16:46 UTC. Reaches only repos
-      `de-fraengi` was invited to.
-- [x] Log in to Claude Code inside the container (reported by the user
-      2026-11-05).
+      scope `repo`, regenerated 2026-11-05, expires 2027-02-03 17:28 UTC.
+      Reaches only repos `de-fraengi` was invited to; the other repos of
+      `XZ6Hte` are public (read only).
+- [x] Log in to Claude Code inside the container (subscription login via
+      `/login`; `~/.claude/.credentials.json` exists, no API key in the
+      container, 2026-11-05).
 - [x] Log in to OpenCode inside the container (done: `opencode auth list`
-      shows Anthropic stored plus `ANTHROPIC_API_KEY` from the environment;
-      OpenCode is v2.2.5).
+      shows Anthropic stored; OpenCode is v2.2.5).
 - [ ] `OPENAI_API_KEY` in `.env` is empty (optional).
-- [ ] Claude Code in the container bills via API (`/status` 2026-11-05: "API
-      Usage Billing", Opus 5.5), using `ANTHROPIC_API_KEY` from `.env`; the
-      agent can read the key. Set a monthly spending limit on the key in the
-      Anthropic Console, and consider Sonnet as the default model
-      (`config/claude/settings.json`). Alternative: remove the key from `.env`
-      and use `/login` with a Pro subscription (OpenCode then needs its own
-      login or key).
+- [x] Claude Code billing: `/status` showed "API Usage Billing" (Opus 5.5)
+      with the key from `.env`. Switched to the subscription login; the key is
+      commented out in `.env`. If a key is used again, set a monthly spending
+      limit in the Anthropic Console (the agent can read it).
 - [ ] Note: `/home/dev/.claude.json` is not in a volume and is lost on
       `--force-recreate`; Claude Code may ask for its first-run setup again.
 - [ ] Always work on feature branches; direct pushes to `main` are rejected.
 - [x] Replace the `.env` token with one from `de-fraengi`, recreate the
       container, `gh auth status` shows `de-fraengi` (done 2026-11-05).
-- [ ] Revoke the old `XZ6Hte` token (it saw four repos, expires 2027-01-31) on
-      GitHub: Settings → Developer settings.
-- [ ] Set a calendar reminder for rotation before 2027-02-03.
+- [x] Revoke the old `XZ6Hte` token (it saw four repos, expires 2027-01-31) on
+      GitHub (reported done by the user 2026-11-05; not verifiable from here).
+- [x] Set a calendar reminder for rotation before 2027-02-03 (reported done).
 - [ ] Optional: delete the disabled, empty ruleset `Protect` (id 26316341) on
       `satzart`; it is superseded by `main-protect`.
 
@@ -88,7 +86,7 @@ Context:
 
 Resolution: `.env` now holds the `de-fraengi` token (classic, `repo`, expires
 2027-02-03); `satzart` has an active ruleset with 1 required approval and no
-bypass. Open: revoke the old `XZ6Hte` token.
+bypass. The old `XZ6Hte` token was revoked (reported by the user).
 
 - The container's `GH_TOKEN` authenticates as `XZ6Hte` (owner account), NOT the
   machine user `de-fraengi`. It is presumably a fine-grained PAT (no
@@ -124,7 +122,7 @@ consumes a seat on paid org plans, commits attributed to the machine account.
       - Pull requests: read/write (open/update PRs)
       - Workflows: read/write only if the agent may change `.github/workflows/*`
       - Metadata: read (automatic)
-- [x] Set an expiry: 90 days (2027-02-03). Calendar reminder: still open.
+- [x] Set an expiry: 90 days (2027-02-03) and a calendar reminder.
 - [x] Put it in `.env` as `GITHUB_PERSONAL_ACCESS_TOKEN` (now the `de-fraengi`
       token).
 - [ ] Rotate later by editing `.env` and recreating the container.
