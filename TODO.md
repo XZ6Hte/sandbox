@@ -14,9 +14,6 @@ Tasks:
 - [ ] `satzart`: decide the first task for the agent (postponed). No
       application code exists yet: no `composer.json`, no `artisan`; only
       `docs/`, `.ai/`, `.claude/`, `AGENTS.md`.
-- [ ] `satzart`: approve and merge PR #27 (closes `T-065`, decision "GitHub
-      Pro: yes") as `XZ6Hte`. The required checks `hooks` and `immutable`
-      (jobs of `agent-guard.yml`) are already in ruleset `main-protect`.
 
 Optional:
 
@@ -60,7 +57,7 @@ kept below as an alternative.
 - Ruleset `main-protect` on `satzart` (id 26631397): pull request required,
   1 approval, stale approvals dismissed, last pusher cannot approve,
   conversations resolved, force push and deletion blocked, no bypass actors,
-  required status checks `hooks` and `immutable`.
+  required status checks `hooks` and `immutable` (jobs of `agent-guard.yml`).
   Rulesets on private repos need GitHub Pro on `XZ6Hte` (bought 2026-11-05).
 - Verified in the container: `gh auth status` shows `de-fraengi`; a direct
   push to `main` is rejected; a test PR showed REVIEW_REQUIRED and was closed
@@ -78,6 +75,9 @@ History:
   the subscription login.
 - Decided 2026-11-05: no OpenAI key (not needed); the empty ruleset `Protect`
   on `satzart` was deleted.
+- 2026-11-05: `satzart` PR #27 (closes `T-065`, decision "GitHub Pro: yes")
+  was opened by `de-fraengi` from the container, approved by `XZ6Hte` and
+  merged (merge commit `ff5d517`): the full review flow works end to end.
 
 ## Alternative: Option B — GitHub App (not planned)
 
